@@ -153,10 +153,5 @@ a.out.*
 
 AGENTS.local.md
 .pi/SYSTEM.md
-
-# Codely
 .codely*
 CODELY.md
-
-# Local UI assets
-tools/ui/dist.tar.gz
