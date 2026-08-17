@@ -625,7 +625,12 @@ void field_bool::eval(field_eval_context & ctx, const json & data) {
                 if (custom_handler) {
                     custom_handler(ctx, data);
                 } else {
-                    val = data.at(n).get<bool>();
+                    const auto & v = data.at(n);
+                    if (v.is_string()) {
+                        val = v.get<std::string>() == "true";
+                    } else {
+                        val = v.get<bool>();
+                    }
                 }
             });
             return;

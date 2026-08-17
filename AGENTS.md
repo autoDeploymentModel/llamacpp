@@ -246,3 +246,48 @@ Chat template and parser:
 - [PEG parser](docs/development/parsing.md) - alternative to regex that llama.cpp uses to parse model's output
 - [Auto parser](docs/autoparser.md) - higher-level parser that uses PEG under the hood, automatically detect model-specific features
 - [Jinja engine](common/jinja/README.md)
+
+## Local Build (Windows CUDA)
+
+### Dependencies
+
+- Visual Studio 2022 (MSVC 14.44+)
+- CUDA Toolkit 12.3 (at `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3`)
+- Ninja build system
+- CMake 4.3+
+
+### Notes
+
+CUDA 12.3 does not officially support MSVC 14.44+. Two workarounds are required:
+- `-allow-unsupported-compiler` bypasses `host_config.h` version check
+- `-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH` bypasses `yvals_core.h` STL version check
+
+PowerShell does not support `&&` chaining, so build commands must be run via a `.bat` file with `vcvarsall.bat` first.
+
+### Build Script
+
+Create `_build_cuda.bat` in the project root:
+
+```bat
+@echo off
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+cmake -G Ninja -B build -DGGML_CUDA=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_CUDA_FLAGS="-allow-unsupported-compiler -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH" -DCUDAToolkit_ROOT="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3"
+cmake --build build --config Release -j %NUMBER_OF_PROCESSORS%
+```
+
+Run it:
+
+```
+cmd /c _build_cuda.bat
+```
+
+### UI Assets
+
+Local vite build has compatibility issues (Svelte TS preprocessing). Instead, download prebuilt UI from GitHub releases:
+
+```
+curl.exe -L --proxy http://127.0.0.1:10809 -o tools\ui\dist.tar.gz "https://github.com/ggml-org/llama.cpp/releases/download/b<BUILD_NUMBER>/llama-b<BUILD_NUMBER>-ui.tar.gz"
+tar -xzf tools\ui\dist.tar.gz -C tools\ui\dist --strip-components=1
+```
+
+CMake will automatically detect `tools/ui/dist/index.html` and embed it into the server binary.

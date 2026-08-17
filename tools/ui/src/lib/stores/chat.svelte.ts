@@ -2877,7 +2877,9 @@ class ChatStore {
 		if (currentConfig.samplers) apiOptions.samplers = currentConfig.samplers;
 
 		if (hasValue(currentConfig.backend_sampling))
-			apiOptions.backend_sampling = currentConfig.backend_sampling;
+			apiOptions.backend_sampling =
+				currentConfig.backend_sampling === true ||
+				currentConfig.backend_sampling === 'true';
 
 		if (currentConfig.customJson) apiOptions.custom = currentConfig.customJson;
 
