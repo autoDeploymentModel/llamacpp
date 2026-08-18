@@ -1315,7 +1315,7 @@ jobs:
             echo "Tag ${TAG} already exists, skipping creation"
           else
             git tag "${TAG}"
-            git push main "${TAG}"
+            git push origin "${TAG}"
           fi
 
       - name: Create release
