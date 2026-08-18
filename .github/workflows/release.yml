@@ -772,8 +772,8 @@ jobs:
       - name: Build
         id: cmake_build
         run: |
-          cmake -S . -B build ${{ matrix.defines }} -DGGML_NATIVE=OFF -DGGML_CPU=OFF -DGGML_BACKEND_DL=ON -DLLAMA_BUILD_BORINGSSL=ON
-          cmake --build build --config Release --target ${{ matrix.target }}
+          cmake -S . -B build ${{ matrix.defines }} -DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON -DLLAMA_BUILD_BORINGSSL=ON ${{ env.CMAKE_ARGS }}
+          cmake --build build --config Release
 
       #- name: ccache-clear
       #  uses: ./.github/actions/ccache-clear
@@ -783,7 +783,7 @@ jobs:
       - name: Pack artifacts
         id: pack_artifacts
         run: |
-          7z a -snl llama-bin-win-${{ matrix.backend }}-${{ matrix.arch }}.zip .\build\bin\Release\${{ matrix.target }}.dll
+          7z a -snl llama-bin-win-${{ matrix.backend }}-${{ matrix.arch }}.zip .\build\bin\Release\*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -851,11 +851,12 @@ jobs:
           cmake -S . -B build -G "Ninja Multi-Config" ^
             -DGGML_BACKEND_DL=ON ^
             -DGGML_NATIVE=OFF ^
-            -DGGML_CPU=OFF ^
+            -DGGML_CPU_ALL_VARIANTS=ON ^
             -DGGML_CUDA=ON ^
-            -DLLAMA_BUILD_BORINGSSL=ON ${{ matrix.defines }}
+            -DLLAMA_BUILD_BORINGSSL=ON ${{ matrix.defines }} ^
+            ${{ env.CMAKE_ARGS }}
           set /A NINJA_JOBS=%NUMBER_OF_PROCESSORS%-1
-          cmake --build build --config Release -j %NINJA_JOBS% --target ggml-cuda
+          cmake --build build --config Release -j %NINJA_JOBS%
 
       - name: ccache-clear
         uses: ./.github/actions/ccache-clear
@@ -865,7 +866,7 @@ jobs:
       - name: Pack artifacts
         id: pack_artifacts
         run: |
-          7z a -snl llama-bin-win-cuda-${{ matrix.cuda }}-${{ matrix.arch }}.zip .\build\bin\Release\ggml-cuda.dll
+          7z a -snl llama-bin-win-cuda-${{ matrix.cuda }}-${{ matrix.arch }}.zip .\build\bin\Release\*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
