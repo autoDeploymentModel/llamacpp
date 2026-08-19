@@ -861,11 +861,12 @@ jobs:
           key: release-windows-2022-${{ matrix.arch }}-cuda-${{ matrix.cuda }}
 
       - name: Copy CUDA runtime DLLs
+        shell: powershell
         run: |
           $dst='.\build\bin\Release\'
-          robocopy "${{env.CUDA_PATH}}\bin" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll
-          robocopy "${{env.CUDA_PATH}}\lib" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll
-          robocopy "${{env.CUDA_PATH}}\bin\x64" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll
+          robocopy "${{env.CUDA_PATH}}\bin" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll; if ($LASTEXITCODE -lt 8) { $global:LASTEXITCODE = 0 }
+          robocopy "${{env.CUDA_PATH}}\lib" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll; if ($LASTEXITCODE -lt 8) { $global:LASTEXITCODE = 0 }
+          robocopy "${{env.CUDA_PATH}}\bin\x64" $dst cudart64_*.dll cublas64_*.dll cublasLt64_*.dll; if ($LASTEXITCODE -lt 8) { $global:LASTEXITCODE = 0 }
 
       - name: Pack artifacts
         id: pack_artifacts
