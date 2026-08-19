@@ -1338,6 +1338,7 @@ jobs:
 
             **macOS:**
             - [macOS Apple Silicon (arm64)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-macos-arm64.tar.gz)
+            - Note: After download, run `xattr -dr com.apple.quarantine <file>` to remove quarantine flag
 
             **Linux:**
             - [Ubuntu x64 (Vulkan)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-ubuntu-vulkan-x64.tar.gz)
