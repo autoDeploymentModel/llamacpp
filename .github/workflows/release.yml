@@ -810,9 +810,6 @@ jobs:
           - cuda: '13.3'
             arch: x64
             defines: ''
-          - cuda: '13.4'
-            arch: arm64
-            defines: '-DCMAKE_TOOLCHAIN_FILE=cmake/arm64-windows-msvc-cuda.cmake'
 
     steps:
       - name: Clone
@@ -851,7 +848,7 @@ jobs:
           cmake -S . -B build -G "Ninja Multi-Config" ^
             -DGGML_BACKEND_DL=ON ^
             -DGGML_NATIVE=OFF ^
-            -DGGML_CPU=${{ matrix.arch == 'x64' && 'ON' || 'OFF' }} ^
+            -DGGML_CPU=ON ^
             -DGGML_CUDA=ON ^
             -DLLAMA_BUILD_BORINGSSL=ON ${{ matrix.defines }} ^
             ${{ env.CMAKE_ARGS }}
@@ -1350,7 +1347,7 @@ jobs:
             **Windows:**
             - [Windows x64 (CUDA 12)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-12.4-x64.zip) - [CUDA 12.4 DLLs](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/cudart-llama-bin-win-cuda-12.4-x64.zip)
             - [Windows x64 (CUDA 13)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-13.3-x64.zip) - [CUDA 13.3 DLLs](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/cudart-llama-bin-win-cuda-13.3-x64.zip)
-            - [Windows arm64 (CUDA 13) (preview)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-13.4-arm64.zip) - [CUDA 13.4 DLLs](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/cudart-llama-bin-win-cuda-13.4-arm64.zip)
+            - Windows arm64 (CUDA 13) [DISABLED]
             - [Windows x64 (Vulkan)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-vulkan-x64.zip)
             - [Windows x64 (OpenVINO)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ needs.windows-openvino.outputs.openvino_version }}-x64.zip)
             - [Windows x64 (SYCL)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-sycl-x64.zip)
