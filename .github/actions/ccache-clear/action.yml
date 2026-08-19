@@ -10,6 +10,7 @@ runs:
   steps:
     - name: Clear caches
       shell: bash
+      continue-on-error: true
       run: |
         CACHES=$(gh cache list --key "ccache-${{ inputs.key }}" --json id,key --jq '.[] | "\(.id) \(.key)"' 2>/dev/null)
         if [ -z "$CACHES" ]; then
