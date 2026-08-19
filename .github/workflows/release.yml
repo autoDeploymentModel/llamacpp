@@ -865,12 +865,14 @@ jobs:
         run: |
           $dst = '.\build\bin\Release'
           $src = $env:CUDA_PATH
-          Copy-Item "$src\bin\cudart64_*.dll" $dst -ErrorAction SilentlyContinue
-          Copy-Item "$src\bin\cublas64_*.dll" $dst -ErrorAction SilentlyContinue
-          Copy-Item "$src\bin\cublasLt64_*.dll" $dst -ErrorAction SilentlyContinue
-          Copy-Item "$src\lib\cudart64_*.dll" $dst -ErrorAction SilentlyContinue
-          Copy-Item "$src\lib\cublas64_*.dll" $dst -ErrorAction SilentlyContinue
-          Copy-Item "$src\lib\cublasLt64_*.dll" $dst -ErrorAction SilentlyContinue
+          $patterns = @('cudart64_*.dll','cublas64_*.dll','cublasLt64_*.dll')
+          foreach ($p in $patterns) {
+            $files = Get-ChildItem -Path "$src\bin\$p","$src\lib\$p","$src\bin\x64\$p" -ErrorAction SilentlyContinue
+            foreach ($f in $files) {
+              Copy-Item $f.FullName $dst -Force
+              Write-Host "Copied: $($f.Name)"
+            }
+          }
 
       - name: Pack artifacts
         id: pack_artifacts
