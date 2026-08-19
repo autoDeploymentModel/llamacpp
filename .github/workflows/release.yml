@@ -557,7 +557,8 @@ jobs:
           Copy-Item -Path (Join-Path $OPENVINO_ROOT 'docs\licensing\*') -Destination $licensingDest -Recurse -Force
 
           Copy-Item LICENSE $dest
-          7z a -snl llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ env.OPENVINO_VERSION_MAJOR }}-x64.zip $dest\*
+          cd $dest
+          7z a ..\..\..\llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ env.OPENVINO_VERSION_MAJOR }}-x64.zip *
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -686,9 +687,11 @@ jobs:
           echo "ROCM_VERSION_SHORT=$rocmVersionShort" >> $env:GITHUB_ENV
 
       - name: Pack artifacts
+        shell: cmd
         run: |
-          cp "LICENSE" "build\bin\"
-          7z a -snl llama-bin-win-rocm-${{ env.ROCM_VERSION_SHORT }}-${{ matrix.build }}.zip .\build\bin\*
+          copy LICENSE build\bin\
+          cd build\bin
+          7z a ..\..\llama-bin-win-rocm-${{ env.ROCM_VERSION_SHORT }}-${{ matrix.build }}.zip *
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -782,8 +785,10 @@ jobs:
 
       - name: Pack artifacts
         id: pack_artifacts
+        shell: cmd
         run: |
-          7z a -snl llama-bin-win-${{ matrix.backend }}-${{ matrix.arch }}.zip .\build\bin\Release\*
+          cd .\build\bin\Release
+          7z a ..\..\..\llama-bin-win-${{ matrix.backend }}-${{ matrix.arch }}.zip *
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
@@ -989,7 +994,8 @@ jobs:
           cp "${{ env.ONEAPI_ROOT }}/umf/latest/bin/umf.dll" ./build/bin
 
           echo "cp oneAPI running time dll files to ./build/bin done"
-          7z a -snl llama-bin-win-sycl-x64.zip ./build/bin/*
+          cd ./build/bin
+          7z a ../../llama-bin-win-sycl-x64.zip *
 
       - name: Upload the release package
         uses: actions/upload-artifact@v6
