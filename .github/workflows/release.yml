@@ -558,7 +558,7 @@ jobs:
 
           Copy-Item LICENSE $dest
           cd $dest
-          7z a ..\..\..\llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ env.OPENVINO_VERSION_MAJOR }}-x64.zip *
+          7z a "$PWD\..\..\..\..\llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ env.OPENVINO_VERSION_MAJOR }}-x64.zip" *
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
