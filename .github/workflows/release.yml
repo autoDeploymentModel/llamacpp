@@ -1290,8 +1290,8 @@ jobs:
           done
 
           echo "Moving other artifacts..."
-          mv -v artifact/*.zip release
-          mv -v artifact/*.tar.gz release
+          mv -v artifact/*.zip release 2>/dev/null || true
+          mv -v artifact/*.tar.gz release 2>/dev/null || true
 
       - name: Download UI build
         id: download_ui
