@@ -41,16 +41,16 @@ jobs:
           fetch-depth: 0
       - id: version
         run: |
-          # Resolve UI version: BUILD_NUMBER from cmake/build-info.cmake > git hash + epoch > fallback
+          # Resolve UI version: baked BUILD_NUMBER in build-info.cmake > git commit count.
+          # The embedded UI version (tools/ui) derives from LLAMA_BUILD_NUMBER at configure
+          # time, so both must resolve to the same bNNN value to avoid version drift.
           version=""
-          if grep -q "BUILD_NUMBER" cmake/build-info.cmake; then
-            build_number=$(grep "set(BUILD_NUMBER" cmake/build-info.cmake | grep -oP '\d+')
-            if [ -n "$build_number" ] && [ "$build_number" -gt 0 ]; then
-              version="b${build_number}"
-            fi
+          if grep -q "set(BUILD_NUMBER [1-9]" cmake/build-info.cmake; then
+            build_number=$(grep "set(BUILD_NUMBER " cmake/build-info.cmake | grep -oP '\d+' | head -n1)
+            version="b${build_number}"
           fi
           if [ -z "$version" ]; then
-            version=$(git rev-parse --short HEAD)-$(date +%s)
+            version="b$(git rev-list --count HEAD)"
           fi
           echo "ui_version=${version}" >> $GITHUB_OUTPUT
 
@@ -646,6 +646,7 @@ jobs:
             -G "Unix Makefiles" `
             -DCMAKE_PREFIX_PATH="${env:HIP_PATH}" `
             -DCMAKE_BUILD_TYPE=Release `
+            -DLLAMA_BUILD_BORINGSSL=ON `
             -DGGML_BACKEND_DL=ON `
             -DGGML_NATIVE=OFF `
             -DGGML_CPU=ON `
@@ -769,6 +770,7 @@ jobs:
         shell: cmd
         run: |
           cd .\build\bin\Release
+          copy ..\..\..\LICENSE .
           7z a ..\..\..\llama-bin-win-${{ matrix.backend }}-${{ matrix.arch }}.zip *
 
       - name: Upload artifacts
@@ -865,6 +867,7 @@ jobs:
         shell: cmd
         run: |
           cd .\build\bin\Release
+          copy ..\..\..\LICENSE .
           7z a ..\..\..\llama-bin-win-cuda-${{ matrix.cuda }}-${{ matrix.arch }}.zip *
 
       - name: Upload artifacts
@@ -942,6 +945,7 @@ jobs:
         id: pack_artifacts
         run: |
           echo "cp oneAPI running time dll files in ${{ env.ONEAPI_ROOT }} to ./build/bin"
+          cp LICENSE ./build/bin
 
           cp "${{ env.ONEAPI_ROOT }}/mkl/latest/bin/mkl_sycl_blas.5.dll" ./build/bin
           cp "${{ env.ONEAPI_ROOT }}/mkl/latest/bin/mkl_core.2.dll" ./build/bin
@@ -1305,27 +1309,27 @@ jobs:
             - <https://llama.app>
 
             **macOS:**
-            - [macOS Apple Silicon (arm64)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-macos-arm64.tar.gz)
+            - [macOS Apple Silicon (arm64)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-macos-arm64.tar.gz)
             - Note: After download, run `xattr -dr com.apple.quarantine <file>` to remove quarantine flag
 
             **Linux:**
-            - [Ubuntu x64 (Vulkan)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-ubuntu-vulkan-x64.tar.gz)
-            - [Ubuntu x64 (OpenVINO)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-ubuntu-openvino-${{ needs.ubuntu-24-openvino.outputs.openvino_version }}-x64.tar.gz)
+            - [Ubuntu x64 (Vulkan)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-ubuntu-vulkan-x64.tar.gz)
+            - [Ubuntu x64 (OpenVINO)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-ubuntu-openvino-${{ needs.ubuntu-24-openvino.outputs.openvino_version }}-x64.tar.gz)
 
             **Android:**
-            - [Android arm64 (CPU)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-android-arm64.tar.gz)
+            - [Android arm64 (CPU)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-android-arm64.tar.gz)
 
             **Windows:**
-            - [Windows x64 (CUDA 12)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-12.4-x64.zip)
-            - [Windows x64 (CUDA 13)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-13.3-x64.zip)
+            - [Windows x64 (CUDA 12)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-12.4-x64.zip)
+            - [Windows x64 (CUDA 13)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-cuda-13.3-x64.zip)
             - Windows arm64 (CUDA 13) [DISABLED]
-            - [Windows x64 (Vulkan)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-vulkan-x64.zip)
-            - [Windows x64 (OpenVINO)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ needs.windows-openvino.outputs.openvino_version }}-x64.zip)
-            - [Windows x64 (SYCL)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-sycl-x64.zip)
-            - [Windows x64 (ROCm 7.14)](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-rocm-7.14-x64.zip)
+            - [Windows x64 (Vulkan)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-vulkan-x64.zip)
+            - [Windows x64 (OpenVINO)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-openvino-${{ needs.windows-openvino.outputs.openvino_version }}-x64.zip)
+            - [Windows x64 (SYCL)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-sycl-x64.zip)
+            - [Windows x64 (ROCm 7.14)](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-bin-win-rocm-7.14-x64.zip)
 
             **UI:**
-            - [UI](https://github.com/autoDeploymentModel/llamacpp/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-ui.tar.gz)
+            - [UI](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.name }}/llama-${{ steps.tag.outputs.name }}-ui.tar.gz)
 
       - name: Upload release
         id: upload_release
@@ -1339,12 +1343,17 @@ jobs:
             for (let file of await fs.readdirSync('./release')) {
               if (path.extname(file) === '.zip' || file.endsWith('.tar.gz')) {
                 console.log('uploadReleaseAsset', file);
+                const stats = fs.statSync(`./release/${file}`);
                 await github.rest.repos.uploadReleaseAsset({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   release_id: release_id,
                   name: file,
-                  data: await fs.readFileSync(`./release/${file}`)
+                  data: fs.createReadStream(`./release/${file}`),
+                  headers: {
+                    'content-type': 'application/octet-stream',
+                    'content-length': stats.size
+                  }
                 });
               }
             }
